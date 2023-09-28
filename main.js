@@ -35,6 +35,5 @@ agentChain.execute(
   `My mother was of the sky
   My father was of the Earth
   But I am of the universe
-  And you know what it's worth
-  `
+  And you know what it's worth`
 );
