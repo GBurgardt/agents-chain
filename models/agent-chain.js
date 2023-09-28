@@ -5,13 +5,8 @@ export class AgentChain {
     this.agents = [];
   }
 
-  addAgent(systemPrompt, userPromptTemplate, example, gptService) {
-    const agent = new Agent(
-      systemPrompt,
-      userPromptTemplate,
-      example,
-      gptService
-    );
+  addAgent(systemPrompt, userPromptTemplate, example) {
+    const agent = new Agent(systemPrompt, userPromptTemplate, example);
 
     this.agents.push(agent);
     return this; // Permite encadenar

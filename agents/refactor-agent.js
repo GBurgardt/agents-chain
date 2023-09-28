@@ -1,8 +1,6 @@
 import { AgentChain } from "../models/agent-chain.js";
-import { GptService } from "../services/gpt-service.js";
 
 export const getRefactorAgent = () => {
-  const gptService = new GptService(process.env.OPENAI_API_KEY);
   const agentChain = new AgentChain();
 
   agentChain
@@ -32,8 +30,7 @@ export const getRefactorAgent = () => {
                   
                   const fetcher = new DataFetcher();
                   fetcher.fetchData();`,
-      },
-      gptService
+      }
     )
     .addAgent(
       "Eres un AI especializado en simplificar y clarificar código JavaScript. Tu tarea principal es revisar el código refacturizado y optimizado para asegurarte de que es lo más simple y claro posible. Debes eliminar cualquier complejidad innecesaria, asegurarte de que las variables y funciones tienen nombres descriptivos y claros, y de que el código es fácil de leer y mantener.",
@@ -51,8 +48,7 @@ export const getRefactorAgent = () => {
                     
                     const sum = add(3, 4);
                     console.log(sum);`,
-      },
-      gptService
+      }
     );
 
   return agentChain;
