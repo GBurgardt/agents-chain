@@ -9,7 +9,7 @@ export class AgentChain {
     const agent = new Agent(systemPrompt, userPromptTemplate, example);
 
     this.agents.push(agent);
-    return this; // Permite encadenar
+    return this;
   }
 
   async execute(initialText) {
