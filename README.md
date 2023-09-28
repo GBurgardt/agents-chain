@@ -9,6 +9,7 @@ The agents work sequentially to tackle complex problems, not just in coding but 
 ```javascript
 const agentChain = new AgentChain();
 
+// Agent 1: Music Mood Detector
 agentChain.addAgent(
   "You're an AI that determines the mood of text, like song lyrics. Analyze the text and provide the mood it conveys, such as happy, sad, energetic, etc.",
   "Given a piece of text, identify and return the mood or emotion it conveys without additional explanation or comments.",
