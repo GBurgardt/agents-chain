@@ -1,6 +1,5 @@
 export class GptService {
   constructor(apiKey) {
-    console.log("apiKey", apiKey);
     this.apiKey = apiKey;
   }
 

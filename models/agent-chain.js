@@ -16,7 +16,7 @@ export class AgentChain {
     let text = initialText;
     for (let i = 0; i < this.agents.length; i++) {
       const agent = this.agents[i];
-      console.log("AGENT INDEX: ", i + 1);
+      console.log("AGENT: ", i + 1);
 
       text = await agent.processInput(text);
     }
