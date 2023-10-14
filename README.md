@@ -1,4 +1,5 @@
 ## About
+![image](https://github.com/GBurgardt/agents-chain/assets/22543478/ce65fba3-0bdb-4f51-9862-88bce516a944)
 
 `AgentChain` is a simple js tool inspired by [this paper](https://github.com/OpenBMB/ChatDev). It allows GPT agents to work one after the other on smaller tasks.
 Each agent gets input, does its task, and sends the output to the next agent.
