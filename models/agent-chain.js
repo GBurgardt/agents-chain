@@ -15,13 +15,20 @@ export class AgentChain {
     return this;
   }
   async execute(initialText) {
-    this.setInitialPrompt(initialText); // Set the initial prompt
+    this.setInitialPrompt(initialText);
     let text = initialText;
+    let prevAgentFeedback = null;
+
     for (let i = 0; i < this.agents.length; i++) {
       const agent = this.agents[i];
       console.log("AGENT: ", i + 1);
 
-      text = await agent.processInput(text, this.initialPrompt); // Pass the initial prompt to each agent
+      text = await agent.processInput(
+        text,
+        this.initialPrompt,
+        prevAgentFeedback
+      );
+      prevAgentFeedback = agent.feedback;
     }
 
     return text;
