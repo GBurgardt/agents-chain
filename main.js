@@ -1,6 +1,84 @@
 import { AgentChain } from "./models/agent-chain.js";
 
-const agentChain = new AgentChain();
+if (process.argv.length <= 2) {
+  console.error("Por favor proporciona una afirmación como argumento.");
+  process.exit(1);
+}
+
+const userStatement = process.argv[2];
+
+const agentChain = new AgentChain({
+  superExplanation:
+    "La cadena de agentes procesa un fragmento literario a través de cinco etapas distintas: 1) Identifica el origen literario del fragmento; 2) Proporciona un contexto general del contenido citado; 3) Reduce este contexto a una idea central; 4) Traduce dicha idea a una forma aún más simplificada; y 5) Genera una conclusión pragmática basada en todas las simplificaciones anteriores. Esta secuencia asegura una interpretación profunda y clara del fragmento inicial, desde su origen hasta una comprensión práctica.",
+  superPrompt: userStatement,
+});
+
+// Agent 1: Identificador de Origen Literario
+agentChain.addAgent({
+  systemPrompt:
+    "Determina si la frase o expresión proporcionada por el usuario proviene de una obra literaria conocida.",
+  userPrompt:
+    "Dado un fragmento, identifica si es una cita de una obra literaria y, de ser así, devuelve el título y autor.",
+  example: {
+    input: "Lo que no te mata, te hace más fuerte.",
+    output: "Ecce Homo, Friedrich Nietzsche",
+  },
+});
+
+// Agent 2: Contextualizador de la Cita
+agentChain.addAgent({
+  systemPrompt: "Proporciona el contexto general en el que se dijo la cita.",
+  userPrompt:
+    "Recibe el título y autor de la obra y devuelve un resumen contextual del fragmento citado.",
+  example: {
+    input: "Ecce Homo, Friedrich Nietzsche",
+    output:
+      "Nietzsche reflexiona sobre las adversidades de la vida y cómo enfrentarlas.",
+  },
+});
+
+// Agent 3: Primer Reductor
+agentChain.addAgent({
+  systemPrompt: "Reduce el contexto a una idea central.",
+  userPrompt:
+    "Toma el contexto y lo destila a un concepto clave o idea central.",
+  example: {
+    input:
+      "Nietzsche reflexiona sobre las adversidades de la vida y cómo enfrentarlas.",
+    output: "Superación ante las adversidades.",
+  },
+});
+
+// Agent 4: Segundo Reductor
+agentChain.addAgent({
+  systemPrompt: "Traduce la idea central a una forma más simplificada.",
+  userPrompt:
+    "Toma la idea central y la simplifica aún más, preparando el camino para una conclusión directa.",
+  example: {
+    input: "Superación ante las adversidades.",
+    output: "Crecer enfrentando desafíos.",
+  },
+});
+
+// Agent 5: Generador de Conclusión Extendida
+agentChain.addAgent({
+  systemPrompt:
+    "Ofrece una explicación directa y pragmática del fragmento original basándose en las simplificaciones previas.",
+  userPrompt:
+    "Transforma el concepto simplificado en una idea comprensiva y fácil de entender.",
+  example: {
+    input: "Crecer enfrentando desafíos.",
+    output:
+      "Cuando enfrentamos problemas y desafíos en la vida, estos nos dan la oportunidad de aprender, crecer y volvernos más fuertes.",
+  },
+});
+
+agentChain
+  .execute()
+  .then(console.log)
+  .then(() => {
+    console.log("¡Terminado!");
+  });
 
 // // Agent 1: Extractor de Tema
 // agentChain.addAgent(
@@ -145,77 +223,3 @@ const agentChain = new AgentChain();
 //     output: "Los problemas te hacen más fuerte.",
 //   }
 // );
-
-// Agent 1: Identificador de Origen Literario
-agentChain.addAgent(
-  "Determina si la frase o expresión proporcionada por el usuario proviene de una obra literaria conocida.",
-  "Dado un fragmento, identifica si es una cita de una obra literaria y, de ser así, devuelve el título y autor.",
-  {
-    input: "Lo que no te mata, te hace más fuerte.",
-    output: "Ecce Homo, Friedrich Nietzsche",
-  }
-);
-
-// Agent 2: Contextualizador de la Cita
-agentChain.addAgent(
-  "Proporciona el contexto general en el que se dijo la cita.",
-  "Recibe el título y autor de la obra y devuelve un resumen contextual del fragmento citado.",
-  {
-    input: "Ecce Homo, Friedrich Nietzsche",
-    output:
-      "Nietzsche reflexiona sobre las adversidades de la vida y cómo enfrentarlas.",
-  }
-);
-
-// Agent 3: Primer Reductor
-agentChain.addAgent(
-  "Reduce el contexto a una idea central.",
-  "Toma el contexto y lo destila a un concepto clave o idea central.",
-  {
-    input:
-      "Nietzsche reflexiona sobre las adversidades de la vida y cómo enfrentarlas.",
-    output: "Superación ante las adversidades.",
-  }
-);
-
-// Agent 4: Segundo Reductor
-agentChain.addAgent(
-  "Traduce la idea central a una forma más simplificada.",
-  "Toma la idea central y la simplifica aún más, preparando el camino para una conclusión directa.",
-  {
-    input: "Superación ante las adversidades.",
-    output: "Crecer enfrentando desafíos.",
-  }
-);
-
-// Agent 5: Generador de Conclusión Extendida
-agentChain.addAgent(
-  "Ofrece una explicación directa y pragmática del fragmento original basándose en las simplificaciones previas.",
-  "Transforma el concepto simplificado en una idea comprensiva y fácil de entender.",
-  {
-    input: "Crecer enfrentando desafíos.",
-    output:
-      "Cuando enfrentamos problemas y desafíos en la vida, estos nos dan la oportunidad de aprender, crecer y volvernos más fuertes.",
-  }
-);
-
-if (process.argv.length <= 2) {
-  console.error("Por favor proporciona una afirmación como argumento.");
-  process.exit(1);
-}
-
-const userStatement = process.argv[2];
-
-agentChain
-  .execute(userStatement)
-  .then(console.log)
-  .then(() => {
-    console.log("¡Terminado!");
-  });
-
-// agentChain
-//   .execute("Los aliens no existen.")
-//   .then(console.log)
-//   .then(() => {
-//     console.log("Done!");
-//   });

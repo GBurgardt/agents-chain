@@ -1,54 +1,71 @@
 import { GptService } from "../services/gpt-service.js";
 
 export class Agent {
-  constructor(systemPrompt, userPrompt, example) {
+  constructor({
+    systemPrompt,
+    userPrompt,
+    example,
+    superExplanation,
+    superPrompt,
+  }) {
     this.systemPrompt = systemPrompt;
     this.userPrompt = userPrompt;
     this.example = example;
+    this.superExplanation = superExplanation;
+    this.superPrompt = superPrompt;
   }
 
-  async processInput(text, initialPrompt, prevAgentFeedback = null) {
+  async processInput(prompt) {
     const gptService = new GptService(process.env.OPENAI_API_KEY);
-    const inputMessage = this.createMessage(
-      text,
-      initialPrompt,
-      prevAgentFeedback
-    );
+    const inputMessage = this.createMessage(prompt);
+
     const response = await gptService.getApiResponse(inputMessage);
 
-    // Suponiendo que la respuesta incluye tanto el feedback como el resultado real, puedes separarlos.
-    const [result, feedback] = this.parseResponse(response);
-
-    this.feedback = feedback; // Guarda el feedback para el próximo agente.
-
-    console.log("#".repeat(50));
     console.log("response", response);
-    console.log("#".repeat(50));
 
-    return result;
+    return response;
   }
 
-  createMessage(text, initialPrompt, prevAgentFeedback) {
-    let systemContent = this.systemPrompt;
+  createMessage(prompt) {
+    const systemPrompt = `${this.systemPrompt}
+    Explicacion: ${this.superExplanation}
+    Objetivo Final: ${this.superPrompt}
+    `;
 
-    // Agrega el feedback del agente anterior si existe.
-    if (prevAgentFeedback) {
-      systemContent += `\nNota del Agente Anterior: ${prevAgentFeedback}`;
-    }
+    // console.log([
+    //   { role: "system", content: systemPrompt },
+    //   { role: "user", content: this.userPromptFormat(prompt) },
+    // ]);
 
     return [
-      { role: "system", content: systemContent },
-      { role: "user", content: this.userPromptFormat(text, initialPrompt) },
+      { role: "system", content: systemPrompt },
+      { role: "user", content: this.userPromptFormat(prompt) },
     ];
   }
 
-  parseResponse(response) {
-    // Aquí, estás dividiendo la respuesta suponiendo que viene en el formato "resultado|feedback".
-    const [result, feedback] = response.split("|");
-    return [result, feedback];
-  }
+  userPromptFormat(currentPrompt) {
+    return `${this.userPrompt}
+    Example:
+    Input: "${this.example.input}"
+    Objetivo final: ${this.superPrompt}
+    Output: "${this.example.output}"
 
-  userPromptFormat(text, initialPrompt) {
-    return `${this.userPrompt}\nExample:\nInput: "${this.example.input}"\nOutput: "${this.example.output}"\nInitial Prompt: ${initialPrompt}\nCurrent Input: ${text}\n`;
+    Input: ${currentPrompt}
+    Objetivo final: ${this.superPrompt}
+    Output: `;
   }
 }
+
+// userPromptFormat(currentPrompt) {
+//   return `${this.userPrompt}
+//   Example:
+//   Superagent Explanation: ${this.superExplanation}
+//   Superagent Prompt (superprompt): ${this.superPrompt}
+//   Input: "${this.example.input}"
+//   Output: "${this.example.output}"
+
+//   Superagent Explanation: ${this.superExplanation}
+//   Superagent Prompt (superprompt): ${this.superPrompt}
+//   Input: ${currentPrompt}
+//   Output: `;
+// }

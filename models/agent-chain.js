@@ -1,34 +1,37 @@
 import { Agent } from "./agent.js";
 
 export class AgentChain {
-  constructor() {
+  constructor({ superExplanation, superPrompt }) {
+    this.superPrompt = superPrompt;
+    this.superExplanation = superExplanation;
     this.agents = [];
   }
 
-  setInitialPrompt(prompt) {
-    this.initialPrompt = prompt;
+  setSuperPrompt(prompt) {
+    this.superPrompt = prompt;
   }
-  addAgent(systemPrompt, userPromptTemplate, example) {
-    const agent = new Agent(systemPrompt, userPromptTemplate, example);
+
+  addAgent({ systemPrompt, userPrompt, example }) {
+    const agent = new Agent({
+      systemPrompt,
+      userPrompt,
+      example,
+      superExplanation: this.superExplanation,
+      superPrompt: this.superPrompt,
+    });
 
     this.agents.push(agent);
     return this;
   }
-  async execute(initialText) {
-    this.setInitialPrompt(initialText);
-    let text = initialText;
-    let prevAgentFeedback = null;
+
+  async execute() {
+    let text = this.superPrompt;
 
     for (let i = 0; i < this.agents.length; i++) {
       const agent = this.agents[i];
       console.log("AGENT: ", i + 1);
 
-      text = await agent.processInput(
-        text,
-        this.initialPrompt,
-        prevAgentFeedback
-      );
-      prevAgentFeedback = agent.feedback;
+      text = await agent.processInput(text);
     }
 
     return text;
