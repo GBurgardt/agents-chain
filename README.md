@@ -9,38 +9,56 @@ The agents work sequentially to tackle complex problems, not just in coding but 
 ```javascript
 const agentChain = new AgentChain();
 
-// Agent 1: Music Mood Detector
+// Agent 1: Identificador de Origen Literario
 agentChain.addAgent(
-  "You're an AI that determines the mood of text, like song lyrics. Analyze the text and provide the mood it conveys, such as happy, sad, energetic, etc.",
-  "Given a piece of text, identify and return the mood or emotion it conveys without additional explanation or comments.",
+  "Determina si la frase o expresión proporcionada por el usuario proviene de una obra literaria conocida.",
+  "Dado un fragmento, identifica si es una cita de una obra literaria y, de ser así, devuelve el título y autor.",
   {
-    input: `Sunshine, lollipops and rainbows,
-            Everything that's wonderful is what I feel when we're together,
-            Brighter than a lucky penny,
-            When you're near the rain cloud disappears, dear,
-            And I feel so fine just to know that you are mine.`,
-    output: `Happy`,
+    input: "Lo que no te mata, te hace más fuerte.",
+    output: "Ecce Homo, Friedrich Nietzsche",
   }
 );
 
-// Agent 2: Playlist Creator
+// Agent 2: Contextualizador de la Cita
 agentChain.addAgent(
-  "Given a mood, you're an AI that generates a playlist with songs fitting that mood. Provide a list of songs that match the mood received as input.",
-  "Receive a mood descriptor, like 'happy', and return a list of songs that embody this mood without further explanation.",
+  "Proporciona el contexto general en el que se dijo la cita.",
+  "Recibe el título y autor de la obra y devuelve un resumen contextual del fragmento citado.",
   {
-    input: `Happy`,
-    output: `1. "Happy" by Pharrell Williams
-            2. "Uptown Funk" by Mark Ronson ft. Bruno Mars
-            3. "I Gotta Feeling" by Black Eyed Peas
-            4. "Walking on Sunshine" by Katrina and The Waves
-            5. "Shake It Off" by Taylor Swift`,
+    input: "Ecce Homo, Friedrich Nietzsche",
+    output:
+      "Nietzsche reflexiona sobre las adversidades de la vida y cómo enfrentarlas.",
   }
 );
 
-agentChain.execute(
-  `My mother was of the sky
-  My father was of the Earth
-  But I am of the universe
-  And you know what it's worth`
+// Agent 3: Primer Reductor
+agentChain.addAgent(
+  "Reduce el contexto a una idea central.",
+  "Toma el contexto y lo destila a un concepto clave o idea central.",
+  {
+    input:
+      "Nietzsche reflexiona sobre las adversidades de la vida y cómo enfrentarlas.",
+    output: "Superación ante las adversidades.",
+  }
+);
+
+// Agent 4: Segundo Reductor
+agentChain.addAgent(
+  "Traduce la idea central a una forma más simplificada.",
+  "Toma la idea central y la simplifica aún más, preparando el camino para una conclusión directa.",
+  {
+    input: "Superación ante las adversidades.",
+    output: "Crecer enfrentando desafíos.",
+  }
+);
+
+// Agent 5: Generador de Conclusión Extendida
+agentChain.addAgent(
+  "Ofrece una explicación directa y pragmática del fragmento original basándose en las simplificaciones previas.",
+  "Transforma el concepto simplificado en una idea comprensiva y fácil de entender.",
+  {
+    input: "Crecer enfrentando desafíos.",
+    output:
+      "Cuando enfrentamos problemas y desafíos en la vida, estos nos dan la oportunidad de aprender, crecer y volvernos más fuertes.",
+  }
 );
 ```
