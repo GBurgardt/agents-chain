@@ -120,48 +120,4 @@ export class AgentCreator {
 
     console.log("Finalizando ejecución del SuperAgente.");
   }
-
-  // async execute({ prompt }) {
-  //   console.log("Iniciando ejecución del SuperAgente.");
-
-  //   const agents = extractArrayFromString(
-  //     await executeAgent(this.createAgent1(prompt), prompt, containsArray)
-  //   );
-
-  //   console.log("Resultado del Agente 1:", agents);
-
-  //   const agent2 = this.createAgent2();
-
-  //   const mappedAgents = await Promise.all(
-  //     agents.map(async agentDescription => {
-  //       const userPromptOutput = await executeAgent(
-  //         agent2,
-  //         agentDescription,
-  //         response => {
-  //           // Asumimos que una respuesta válida de agent2 siempre contiene "UserPrompt:"
-  //           return response.includes("UserPrompt:");
-  //         }
-  //       );
-  //       console.log("userPromptOutput", userPromptOutput);
-  //       const userPromptMatch = userPromptOutput.match(/UserPrompt: "(.*)"/);
-  //       const userPrompt = userPromptMatch ? userPromptMatch[1] : "";
-
-  //       return {
-  //         systemPrompt: agentDescription,
-  //         userPrompt,
-  //       };
-  //     })
-  //   );
-
-  //   console.log("Mapeo de Agentes:", mappedAgents);
-
-  //   console.log("Finalizando ejecución del SuperAgente.");
-  // }
 }
-
-// Descripciones: [
-//   "As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure",
-//   "As Agent 2, you are entrusted with the crucial task to create the foundational HTML structure for the described elements and enhancing that HTML. Apply expert knowledge in UI/UX design, ensuring that if images are used, their 'alt' descriptions are detailed and comprehensive, allowing anyone to vividly understand the image's content. You will work on creating a visually impressive HTML structure that aligns with modern design practices. Your work sets the stage for Agent 3, who will apply the finishing touches using Tailwind CSS. Ensure your output is focused purely on the create and enhanced HTML without any added explanations after the HTML",
-//   "As Agent 3, you hold the key role of finalizing the design by transforming the improved HTML provided by Agent 3 into a visually stunning representation using Tailwind CSS. Your expertise will breathe life into the design, making it both beautiful and impressive. Collaborate with the previous agents, and make sure the final HTML embodies the described style. Keep your output focused on the enhanced HTML without additional explanations.",
-//   "As Agent 4, you are entrusted with the crucial task to create the improve and already HTML with tailwind. Applying expert knowledge in UI/UX design, you will work on creating a visually impressive HTML with modern design practices. And particulary, should be intuitive, and without design errors. Always use Tailwind CSS. Ensure your output is focused purely on the create and ImproveDesing html without any added explanations after the HTML."
-// ]
