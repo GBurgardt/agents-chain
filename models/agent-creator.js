@@ -45,7 +45,7 @@ export class AgentCreator {
         "Convierte la tarea descrita en instrucciones concisas para que gpt pueda comprender y actuar sobre ella.",
       example: {
         input:
-          '"Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender."',
+          "Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender.",
         output:
           'UserPrompt: "As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure"',
       },
@@ -61,9 +61,9 @@ export class AgentCreator {
       userPrompt:
         "Crea un ejemplo concreto que muestre cómo se ejecutaría la tarea basándote en los prompts proporcionados. El ejemplo debe ser ilustrativo y demostrar cómo se aplicaría en una situación real.",
       example: {
-        input: `systemPrompt: 'Agente 1: Analiza y comprende el contenido del artículo académico extenso para extraer las ideas principales.', userPrompt: 'Como Agente 1, tu tarea es analizar y comprender el contenido del artículo académico proporcionado. Extrae las ideas principales y fragmentos significativos que se pueden utilizar para crear publicaciones atractivas y comprensibles para las redes sociales.'
+        input: `systemPrompt: Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender. userPrompt: As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure'
           `,
-        output: `Example: Description: So, I'm thinking of, like, a user profile thing, right? It needs the basics: title, name, what they do (occupation), how much they make (salary), and a tiny story about them (biography). The field names? They should shout out, like, bold and super visible in a gray that pops. But the info they put in? Keep it chill, smaller and in a standard-weight gray. And hey, let's not forget our phone peeps, it's gotta look good on mobile. So, like, one column when it's tiny and three columns when there's space to spread out. Oh, and throw in light gray lines between the fields, just to keep things tidy and easy to read. Prompt: User profile layout: title, name, occupation, salary, biography; Field Names: bold, high-contrast gray; User Data: smaller, standard-weight gray; Design: mobile (1 column), larger screens (3 columns), light gray separators.`,
+        output: `Example: { input: "So, I'm thinking of, like, a user profile thing, right? It needs the basics: title, name, what they do (occupation), how much they make (salary), and a tiny story about them (biography). The field names? They should shout out, like, bold and super visible in a gray that pops. But the info they put in? Keep it chill, smaller and in a standard-weight gray. And hey, let's not forget our phone peeps, it's gotta look good on mobile. So, like, one column when it's tiny and three columns when there's space to spread out. Oh, and throw in light gray lines between the fields, just to keep things tidy and easy to read.", output: "User profile layout: title, name, occupation, salary, biography; Field Names: bold, high-contrast gray; User Data: smaller, standard-weight gray; Design: mobile (1 column), larger screens (3 columns), light gray separators."}`,
       },
       superExplanation: this.superExplanation,
       superPrompt: this.superPrompt,
@@ -80,14 +80,15 @@ export class AgentCreator {
     console.log("Resultado del Agente 1:", agents);
 
     const agent2 = this.createAgent2();
+    const agent3 = this.createAgent3();
 
     const mappedAgents = await Promise.all(
       agents.map(async agentDescription => {
+        // Obtener userPrompt
         const userPromptOutput = await executeAgent(
           agent2,
           agentDescription,
           response => {
-            // Asumimos que una respuesta válida de agent2 siempre contiene "UserPrompt:"
             return response.includes("UserPrompt:");
           }
         );
@@ -95,9 +96,22 @@ export class AgentCreator {
         const userPromptMatch = userPromptOutput.match(/UserPrompt: "(.*)"/);
         const userPrompt = userPromptMatch ? userPromptMatch[1] : "";
 
+        // Obtener example
+        const exampleOutput = await executeAgent(
+          agent3,
+          `systemPrompt: '${agentDescription}', userPrompt: '${userPrompt}'`,
+          response => {
+            return response.includes("Example:");
+          }
+        );
+        console.log("exampleOutput", exampleOutput);
+        const exampleMatch = exampleOutput.match(/Example: (.*)/);
+        const example = exampleMatch ? exampleMatch[1] : "";
+
         return {
           systemPrompt: agentDescription,
           userPrompt,
+          example,
         };
       })
     );
@@ -115,6 +129,31 @@ export class AgentCreator {
   //   );
 
   //   console.log("Resultado del Agente 1:", agents);
+
+  //   const agent2 = this.createAgent2();
+
+  //   const mappedAgents = await Promise.all(
+  //     agents.map(async agentDescription => {
+  //       const userPromptOutput = await executeAgent(
+  //         agent2,
+  //         agentDescription,
+  //         response => {
+  //           // Asumimos que una respuesta válida de agent2 siempre contiene "UserPrompt:"
+  //           return response.includes("UserPrompt:");
+  //         }
+  //       );
+  //       console.log("userPromptOutput", userPromptOutput);
+  //       const userPromptMatch = userPromptOutput.match(/UserPrompt: "(.*)"/);
+  //       const userPrompt = userPromptMatch ? userPromptMatch[1] : "";
+
+  //       return {
+  //         systemPrompt: agentDescription,
+  //         userPrompt,
+  //       };
+  //     })
+  //   );
+
+  //   console.log("Mapeo de Agentes:", mappedAgents);
 
   //   console.log("Finalizando ejecución del SuperAgente.");
   // }
