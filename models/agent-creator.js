@@ -93,11 +93,32 @@ export class AgentCreator {
     });
   }
 
+  createConsolidatedAgent() {
+    return new Agent({
+      systemPrompt:
+        "Detección y corrección de errores de formato en códigos JavaScript que contienen objetos JSON malformateados dentro de strings, además de eliminar aclaraciones adicionales.",
+      userPrompt:
+        "Tu tarea es analizar el código JavaScript proporcionado. Busca y corrije secciones que contienen objetos JSON malformateados dentro de strings. Además, si hay aclaraciones adicionales después del objeto JSON, elimínalas para dejar solo el código con el objeto JSON correctamente formateado.",
+      example: {
+        input:
+          'let data = \'{"name":"John", "age":30, "city":"New York"}\'; Este código habla de John y su edad y su ciudad',
+        output: 'let data = {"name":"John", "age":30, "city":"New York"};',
+      },
+      superExplanation:
+        "Este agente está diseñado para identificar y corregir errores de formato en códigos JavaScript que contienen objetos JSON malformateados dentro de strings. No solo identificará y corregirá los objetos JSON malformateados, sino que también eliminará aclaraciones adicionales presentes en el código para dejar un código limpio y correctamente formateado.",
+      superPrompt: this.superPrompt,
+    });
+  }
+
   async execute({ prompt }) {
     console.log("Iniciando ejecución del SuperAgente.");
 
     const agents = extractArrayFromString(
-      await executeAgent(this.createAgent1(prompt), prompt, containsArray)
+      await executeAgent({
+        agent: this.createAgent1(prompt),
+        prompt,
+        validationFn: containsArray,
+      })
     );
 
     const superExplanationAgent = this.superExplanationAgent();
@@ -105,9 +126,10 @@ export class AgentCreator {
     const superExplanation = await executeAgent({
       agent: superExplanationAgent,
       prompt: `prompt: '${prompt}', agents: ${JSON.stringify(agents)}`,
-      validationFn: response => {
-        return response.includes("SuperExplanation:");
-      },
+      validationFn: response =>
+        !response.includes("Disculpas") ||
+        response.includes("Error") ||
+        response.includes("Sorry"),
     });
 
     console.log("superExplanation", superExplanation);
@@ -116,6 +138,7 @@ export class AgentCreator {
 
     const agent2 = this.createAgent2();
     const agent3 = this.createAgent3();
+    const consolidateAgent = this.createConsolidatedAgent();
 
     const mappedAgents = await Promise.all(
       agents.map(async agentDescription => {
@@ -138,56 +161,31 @@ export class AgentCreator {
         });
 
         const example = exampleOutput.replace("Example:", "").trim();
+        console.log("example", example);
+
+        const consolidateExample = await executeAgent({
+          agent: consolidateAgent,
+          prompt: example,
+          validationFn: response => {
+            return response.includes("{") && response.includes("}");
+          },
+        });
+
+        console.log("consolidateExample", consolidateExample);
 
         return {
           systemPrompt: agentDescription,
           userPrompt,
           example,
+          consolidateExample,
         };
       })
     );
 
-    console.log("Mapeo de Agentes:", mappedAgents);
+    // console.log("Mapeo de Agentes:", mappedAgents);
 
-    generateSuperAgent(mappedAgents, superExplanation);
+    await generateSuperAgent(mappedAgents, superExplanation);
 
-    console.log("Finalizando ejecución del SuperAgente.");
+    // console.log("Finalizando ejecución del SuperAgente.");
   }
 }
-
-// const mappedAgents = await Promise.all(
-//   agents.map(async agentDescription => {
-//     // Obtener userPrompt
-//     const userPromptOutput = await executeAgent(
-//       agent2,
-//       agentDescription,
-//       response => {
-//         return response.includes("UserPrompt:");
-//       }
-//     );
-//     console.log("userPromptOutput", userPromptOutput);
-//     // const userPromptMatch = userPromptOutput.match(/UserPrompt: "(.*)"/);
-//     // const userPrompt = userPromptMatch ? userPromptMatch[1] : "";
-//     const userPrompt = userPromptOutput.replace("UserPrompt:", "").trim();
-
-//     // Obtener example
-//     const exampleOutput = await executeAgent(
-//       agent3,
-//       `systemPrompt: '${agentDescription}', userPrompt: '${userPrompt}'`,
-//       response => {
-//         return response.includes("Example:");
-//       }
-//     );
-//     console.log("exampleOutput", exampleOutput);
-//     // const exampleMatch = exampleOutput.match(/Example: (.*)/);
-//     // const exampleMatch = exampleOutput.match(/Example:\s*(.*)/s);
-//     // const example = exampleMatch ? exampleMatch[1].trim() : "";
-//     const example = exampleOutput.replace("Example:", "").trim();
-
-//     return {
-//       systemPrompt: agentDescription,
-//       userPrompt,
-//       example,
-//     };
-//   })
-// );

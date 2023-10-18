@@ -32,10 +32,10 @@ export class Agent {
     Objetivo Final: ${this.superPrompt}
     `;
 
-    console.log([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: this.userPromptFormat(prompt) },
-    ]);
+    // console.log([
+    //   { role: "system", content: systemPrompt },
+    //   { role: "user", content: this.userPromptFormat(prompt) },
+    // ]);
 
     return [
       { role: "system", content: systemPrompt },

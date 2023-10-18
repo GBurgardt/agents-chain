@@ -27,40 +27,36 @@ export async function executeAgent({ agent, prompt, validationFn }) {
   return response;
 }
 
-export function generateSuperAgent(mappedAgents, superExplanation) {
+export async function generateSuperAgent(mappedAgents, superExplanation) {
   const outputFileName = "GeneratedAgentChain.js";
 
   let fileContent = `
-import { AgentChain } from "./models/agent-chain.js";
+    import { AgentChain } from "./models/agent-chain.js";
 
-const userStatement = process.argv[2];
+    const userStatement = process.argv[2];
 
-const generatedAgent = new AgentChain({
-    superExplanation: ${superExplanation},
-    superPrompt: userStatement,
-});
-
-`;
+    const generatedAgent = new AgentChain({
+        superExplanation: ${superExplanation},
+        superPrompt: userStatement,
+    });`;
 
   mappedAgents.forEach(agent => {
     fileContent += `
-// Agente ${agent.systemPrompt.split(":")[0]}
-generatedAgent.addAgent({
-    systemPrompt: "${agent.systemPrompt}",
-    userPrompt: ${agent.userPrompt},
-    example: \`${agent.example}\`,
-});
-`;
+      // Agente ${agent.systemPrompt.split(":")[0]}
+      generatedAgent.addAgent({
+          systemPrompt: "${agent.systemPrompt}",
+          userPrompt: ${agent.userPrompt},
+          example: ${agent.consolidateExample},
+      });`;
   });
 
   fileContent += `
-
-generatedAgent
-    .execute()
-    .then(console.log)
-    .then(() => {
-        console.log("¡Creación del prompt completada!");
-    });
+    generatedAgent
+      .execute()
+      .then(console.log)
+      .then(() => {
+          console.log("¡Creación del prompt completada!");
+      });
 `;
 
   fs.writeFileSync(outputFileName, fileContent);
