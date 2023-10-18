@@ -2,6 +2,7 @@ import {
   containsArray,
   executeAgent,
   extractArrayFromString,
+  generateSuperAgent,
 } from "../services/creator-service.js";
 import { Agent } from "./agent.js";
 
@@ -47,7 +48,7 @@ export class AgentCreator {
         input:
           "Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender.",
         output:
-          'UserPrompt: "As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure"',
+          "UserPrompt: As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure",
       },
       superExplanation: this.superExplanation,
       superPrompt: this.superPrompt,
@@ -61,9 +62,31 @@ export class AgentCreator {
       userPrompt:
         "Crea un ejemplo concreto que muestre cómo se ejecutaría la tarea basándote en los prompts proporcionados. El ejemplo debe ser ilustrativo y demostrar cómo se aplicaría en una situación real.",
       example: {
-        input: `systemPrompt: Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender. userPrompt: As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure'
-          `,
+        input: `systemPrompt: Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender. userPrompt: As Agent 1, your task is to translate the following descriptions into prompts that set the stage for visually impressive designs. These prompts will guide Agent 2 in creating the initial HTML structure`,
         output: `Example: { input: "So, I'm thinking of, like, a user profile thing, right? It needs the basics: title, name, what they do (occupation), how much they make (salary), and a tiny story about them (biography). The field names? They should shout out, like, bold and super visible in a gray that pops. But the info they put in? Keep it chill, smaller and in a standard-weight gray. And hey, let's not forget our phone peeps, it's gotta look good on mobile. So, like, one column when it's tiny and three columns when there's space to spread out. Oh, and throw in light gray lines between the fields, just to keep things tidy and easy to read.", output: "User profile layout: title, name, occupation, salary, biography; Field Names: bold, high-contrast gray; User Data: smaller, standard-weight gray; Design: mobile (1 column), larger screens (3 columns), light gray separators."}`,
+      },
+      superExplanation: this.superExplanation,
+      superPrompt: this.superPrompt,
+    });
+  }
+
+  superExplanationAgent() {
+    return new Agent({
+      systemPrompt:
+        "A partir del 'prompt' inicial y la lista de agentes proporcionados, crea una 'superExplanation' que describa de manera general el propósito y funcionamiento del superagente y cómo coordina sus sub-agentes.",
+      userPrompt:
+        "Elabora una explicación cohesiva que describa el objetivo principal del superagente, seguido por una descripción de cómo cada agente contribuye al proceso general.",
+      example: {
+        input: `
+        prompt: Imagina una aplicación donde introduces un breve texto (prompt) y recibes a cambio un componente HTML estilizado con Tailwind CSS. Piensa en ello como tu generador personal de componentes UX.
+        agents: [
+          "Agente 1: Interpreta la descripción o breve texto inicial y la convierte en un prompt optimizado que una IA pueda entender.",
+          "Agente 2: Toma el prompt optimizado y genera un esquema de un componente HTML básico.",
+          "Agente 3: Toma el esquema del componente HTML y aplica estilos utilizando Tailwind CSS.",
+          "Agente 4: Revisa el componente HTML estilizado y realiza mejoras en el diseño para optimizar la experiencia del usuario."
+        ]
+        `,
+        output: `El superagente es diseñado para transformar una idea o descripción breve en un componente HTML estilizado usando Tailwind CSS. El proceso comienza con el Agente 1, que interpreta y optimiza la descripción inicial para que sea más comprensible para la IA. Luego, el Agente 2 toma ese prompt optimizado y esboza la estructura base del componente HTML. Una vez que la estructura está definida, el Agente 3 entra en acción, aplicando estilos específicos con Tailwind CSS. Finalmente, el Agente 4 revisa y mejora el diseño estilizado para asegurar una óptima experiencia de usuario. Juntos, estos agentes trabajan de manera secuencial y coordinada para convertir una simple idea en un componente visualmente atractivo.`,
       },
       superExplanation: this.superExplanation,
       superPrompt: this.superPrompt,
@@ -77,6 +100,18 @@ export class AgentCreator {
       await executeAgent(this.createAgent1(prompt), prompt, containsArray)
     );
 
+    const superExplanationAgent = this.superExplanationAgent();
+
+    const superExplanation = await executeAgent({
+      agent: superExplanationAgent,
+      prompt: `prompt: '${prompt}', agents: ${JSON.stringify(agents)}`,
+      validationFn: response => {
+        return response.includes("SuperExplanation:");
+      },
+    });
+
+    console.log("superExplanation", superExplanation);
+
     console.log("Resultado del Agente 1:", agents);
 
     const agent2 = this.createAgent2();
@@ -84,29 +119,25 @@ export class AgentCreator {
 
     const mappedAgents = await Promise.all(
       agents.map(async agentDescription => {
-        // Obtener userPrompt
-        const userPromptOutput = await executeAgent(
-          agent2,
-          agentDescription,
-          response => {
+        const userPromptOutput = await executeAgent({
+          agent: agent2,
+          prompt: agentDescription,
+          validationFn: response => {
             return response.includes("UserPrompt:");
-          }
-        );
-        console.log("userPromptOutput", userPromptOutput);
-        const userPromptMatch = userPromptOutput.match(/UserPrompt: "(.*)"/);
-        const userPrompt = userPromptMatch ? userPromptMatch[1] : "";
+          },
+        });
 
-        // Obtener example
-        const exampleOutput = await executeAgent(
-          agent3,
-          `systemPrompt: '${agentDescription}', userPrompt: '${userPrompt}'`,
-          response => {
+        const userPrompt = userPromptOutput.replace("UserPrompt:", "").trim();
+
+        const exampleOutput = await executeAgent({
+          agent: agent3,
+          prompt: `systemPrompt: '${agentDescription}', userPrompt: '${userPrompt}'`,
+          validationFn: response => {
             return response.includes("Example:");
-          }
-        );
-        console.log("exampleOutput", exampleOutput);
-        const exampleMatch = exampleOutput.match(/Example: (.*)/);
-        const example = exampleMatch ? exampleMatch[1] : "";
+          },
+        });
+
+        const example = exampleOutput.replace("Example:", "").trim();
 
         return {
           systemPrompt: agentDescription,
@@ -118,6 +149,45 @@ export class AgentCreator {
 
     console.log("Mapeo de Agentes:", mappedAgents);
 
+    generateSuperAgent(mappedAgents, superExplanation);
+
     console.log("Finalizando ejecución del SuperAgente.");
   }
 }
+
+// const mappedAgents = await Promise.all(
+//   agents.map(async agentDescription => {
+//     // Obtener userPrompt
+//     const userPromptOutput = await executeAgent(
+//       agent2,
+//       agentDescription,
+//       response => {
+//         return response.includes("UserPrompt:");
+//       }
+//     );
+//     console.log("userPromptOutput", userPromptOutput);
+//     // const userPromptMatch = userPromptOutput.match(/UserPrompt: "(.*)"/);
+//     // const userPrompt = userPromptMatch ? userPromptMatch[1] : "";
+//     const userPrompt = userPromptOutput.replace("UserPrompt:", "").trim();
+
+//     // Obtener example
+//     const exampleOutput = await executeAgent(
+//       agent3,
+//       `systemPrompt: '${agentDescription}', userPrompt: '${userPrompt}'`,
+//       response => {
+//         return response.includes("Example:");
+//       }
+//     );
+//     console.log("exampleOutput", exampleOutput);
+//     // const exampleMatch = exampleOutput.match(/Example: (.*)/);
+//     // const exampleMatch = exampleOutput.match(/Example:\s*(.*)/s);
+//     // const example = exampleMatch ? exampleMatch[1].trim() : "";
+//     const example = exampleOutput.replace("Example:", "").trim();
+
+//     return {
+//       systemPrompt: agentDescription,
+//       userPrompt,
+//       example,
+//     };
+//   })
+// );
