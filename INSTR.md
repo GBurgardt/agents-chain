@@ -1,3 +1,35 @@
+# Funciones de Activacion aplicadas a agentes
+
+La idea central detrás de las funciones de activación en redes neuronales es introducir no-linealidades, permitiendo que la red aprenda relaciones más complejas entre las entradas y las salidas. En el contexto de tu librería de agentes, una forma de introducir algo similar sería introducir "transformaciones" o "filtros" entre agentes para que la información no se transmita de forma lineal y directa, sino que pase por una modificación o procesamiento intermedio.
+
+**Propuesta: Funciones de Transformación entre Agentes**
+
+1. **Definición**: Una función de transformación se sitúa entre dos agentes. Cuando un agente A envía una respuesta a un agente B, antes de que B reciba la información, la función de transformación procesa esa respuesta y modifica o filtra ciertos aspectos de ella.
+
+2. **Tipos de Transformaciones**:
+
+   - **Thresholding (Umbralización)**: Si la respuesta de un agente tiene una cierta métrica (por ejemplo, confianza o probabilidad) por debajo de un umbral, no se pasa a la siguiente etapa.
+
+   - **Amplificación/Atenuación**: Basado en ciertos criterios, la respuesta de un agente puede ser amplificada (haciéndola más prominente) o atenuada (reduciendo su impacto).
+
+   - **Derivación**: Cambia la respuesta en función de su variación respecto a respuestas anteriores. Si un agente está dando respuestas similares repetidamente, este filtro podría generar un cambio para evitar la redundancia.
+
+   - **Aleatorización**: Introduce un elemento de aleatoriedad en la respuesta, para asegurar que el sistema no caiga en bucles predictivos.
+
+3. **Adaptabilidad**: Similar a cómo las redes neuronales aprenden las mejores ponderaciones, podrías introducir un mecanismo de retroalimentación que ajuste estas transformaciones en función del éxito o fracaso de la cadena completa de agentes en resolver una tarea. Esto permite que las transformaciones se adapten y mejoren con el tiempo.
+
+**Argumentación**:
+Introducir funciones de transformación entre agentes puede enriquecer significativamente la capacidad de tu sistema para resolver tareas complejas. Estas transformaciones, al igual que las funciones de activación en redes neuronales, pueden permitir que tu sistema escape de soluciones triviales o lineales y explore soluciones más ricas y diversas. Al añadir un componente adaptativo, te aseguras de que estas transformaciones no son estáticas, sino que evolucionan y se sintonizan según las necesidades de la tarea en cuestión.
+
+**Ejemplo ilustrativo**:
+Supongamos que tienes tres agentes en cadena: A, B y C. A extrae información de un texto, B la procesa y C genera un resumen.
+
+Sin funciones de transformación, si A extrae información irrelevante, B la procesará y C generará un resumen con esa irrelevancia.
+
+Introduciendo una función de umbralización entre A y B, si la información extraída por A se considera poco relevante (por debajo de un umbral), B podría no recibir esa información y, por lo tanto, C no la incluiría en el resumen.
+
+Al introducir estas transformaciones, puedes mejorar la eficiencia y precisión de tu cadena de agentes, permitiendo que se adapte y aprenda mejor de los datos con los que trabaja.
+
 # SuperAgente: Propuesta de Desarrollo
 
 ## Resumen

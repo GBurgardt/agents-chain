@@ -12,7 +12,7 @@ export class AgentCreator {
       'El "superagente" opera en un proceso coordinado donde diferentes sub-agentes trabajan en secuencia para descomponer y elaborar sobre una tarea dada. Estos pasos son: 1) **Divisor de agentes** - Este agente toma el input inicial y lo fragmenta en sub-tareas específicas (agentes), cada uno con una tarea más simple bien definida; 2) **Generador de Descripciones** - A partir de las tareas definidas por Pookie, este agente elabora una descripción clara para cada tarea (este agente se ejecuta en bucle para cada agente anterior); 3) **Creador de Prompts** - Utilizando las descripciones previamente creadas, genera prompts que sirven de guía para los usuarios y el sistema(este agente y el 4 se ejecuta en bucle para cada descripción anterior); 4) **Generador de Ejemplos** - Basándose en estos prompts y en el contexto global, este último agente produce ejemplos prácticos que muestran cómo se llevaría a cabo la tarea.';
   }
 
-  createAgent1(superPrompt) {
+  createLayers(superPrompt) {
     this.superPrompt = superPrompt;
 
     return new Agent({
@@ -38,7 +38,7 @@ export class AgentCreator {
     });
   }
 
-  createAgent2() {
+  processLayer() {
     return new Agent({
       systemPrompt:
         "Basándote en la descripción del agente, genera un UserPrompt que proporcione instrucciones claras para ejecutar la tarea asociada. El UserPrompt debe guiar en cómo llevar a cabo la tarea específica.",
@@ -115,7 +115,7 @@ export class AgentCreator {
 
     const agents = extractArrayFromString(
       await executeAgent({
-        agent: this.createAgent1(prompt),
+        agent: this.createLayers(prompt),
         prompt,
         validationFn: containsArray,
       })
@@ -136,7 +136,7 @@ export class AgentCreator {
 
     console.log("Resultado del Agente 1:", agents);
 
-    const agent2 = this.createAgent2();
+    const agent2 = this.processLayer();
     const agent3 = this.createAgent3();
     const consolidateAgent = this.createConsolidatedAgent();
 

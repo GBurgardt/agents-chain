@@ -37,7 +37,8 @@ export class GptService {
       return data.choices[0].message.content;
     } else {
       console.log("data", data);
-      return "error";
+      return data;
+      // return "error";
     }
   }
 }
